@@ -105,7 +105,7 @@
 
   /* ---------- metrics strip ---------- */
   .metrics {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px;
     margin-top: 18px; background: var(--line2);
     border: 1px solid var(--line2); border-radius: 8px; overflow: hidden;
   }
@@ -199,6 +199,35 @@
   }
   footer .grow { margin-left: auto; }
 
+  /* ---------- substack digest ---------- */
+  .dig-note { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--muted);
+    letter-spacing: .3px; margin: -6px 0 18px; line-height: 1.5; }
+  .theme { margin-bottom: 22px; }
+  .theme > .t-head {
+    display: flex; align-items: center; gap: 9px; margin-bottom: 10px;
+  }
+  .theme > .t-head .t-name {
+    font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--accent2); font-weight: 600;
+  }
+  .theme > .t-head .t-rule { flex: 1; height: 1px; background: var(--line2); }
+  .theme > .t-head .t-count { font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 1px; color: var(--muted); }
+  .dig-item { padding: 0 0 12px 14px; margin-bottom: 12px; border-left: 2px solid var(--line2); position: relative; }
+  .dig-item:last-child { margin-bottom: 0; }
+  .dig-item.fresh::before { content: ""; position: absolute; left: -2px; top: 3px; width: 2px; height: 16px;
+    background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .dig-item h4 { margin: 0 0 3px; font-size: 15.5px; font-weight: 650; line-height: 1.25; color: var(--ink); }
+  .dig-item .by { font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; letter-spacing: .5px;
+    color: var(--muted); }
+  .dig-item .new { color: var(--accent); }
+  .dig-item p { margin: 4px 0 0; font-size: 14px; color: #c4ccd8; }
+  .cov { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
+  .cov .chip { font-family: ui-monospace, Menlo, monospace; font-size: 10px; letter-spacing: .5px;
+    color: var(--muted); border: 1px solid var(--line2); border-radius: 20px; padding: 4px 10px;
+    background: rgba(13,17,24,.5); }
+  .cov .chip b { color: var(--accent2); font-weight: 600; }
+
   /* ---------- blueprint margin art (wide screens only) ---------- */
   .blueprint { position: fixed; top: 0; height: 100vh; width: 120px; z-index: 0; pointer-events: none;
     opacity: .5; display: none; }
@@ -251,10 +280,8 @@
 
   <!-- metrics strip -->
   <div class="metrics">
-    <div class="metric"><div class="k mono">Feeds</div><div class="v mono"><b>06</b></div></div>
+    <div class="metric"><div class="k mono">Feeds</div><div class="v mono"><b>08</b></div></div>
     <div class="metric"><div class="k mono">Briefs</div><div class="v mono"><b>10</b></div></div>
-    <div class="metric"><div class="k mono">Read Time</div><div class="v mono">~3<span style="color:var(--muted)">m</span></div></div>
-    <div class="metric"><div class="k mono">Signal</div><div class="v mono"><b>●</b> live</div></div>
   </div>
 
   <!-- WORLD -->
@@ -403,6 +430,41 @@
       </div>
     </div>
     <div class="cal-status mono" id="cal-status">Showing last saved schedule. Connecting to Google Calendar&hellip;</div>
+  </section>
+
+  <!-- SUBSTACK DIGEST -->
+  <section>
+    <div class="section-head">
+      <span class="idx mono">08</span><span class="name">Substack Digest</span>
+      <span class="tag">New Since Last Edition</span>
+    </div>
+    <div class="dig-note mono">
+      Rotating scan of ~50 tracked newsletters &mdash; only posts published since the prior edition appear here, grouped by theme. Not every source updates daily, and that's by design.
+    </div>
+
+    <!-- AI & MACHINE LEARNING -->
+    <div class="theme">
+      <div class="t-head"><span class="t-name">AI &amp; Machine Learning</span><span class="t-rule"></span><span class="t-count mono">8 sources</span></div>
+      <div class="dig-item fresh">
+        <h4>Co-Existence and the End of Co-Intelligence</h4>
+        <div class="by mono">Ethan Mollick · One Useful Thing · <span class="new">NEW ~15h</span></div>
+        <p>Mollick retires his "co-intelligence" framing in favor of human&ndash;AI <em>co-existence</em> as models grow more autonomous, with a practical aside on how to pitch a book to an AI.</p>
+      </div>
+    </div>
+
+    <!-- COVERAGE -->
+    <div class="theme">
+      <div class="t-head"><span class="t-name">Themes Tracked</span><span class="t-rule"></span><span class="t-count mono">scan @ 05:00 PT</span></div>
+      <div class="cov">
+        <span class="chip mono">AI &amp; ML <b>8</b></span>
+        <span class="chip mono">Medicine &amp; Health <b>8</b></span>
+        <span class="chip mono">Endurance &amp; Performance <b>7</b></span>
+        <span class="chip mono">Space &amp; Cosmos <b>5</b></span>
+        <span class="chip mono">Geopolitics &amp; Governance <b>10</b></span>
+        <span class="chip mono">Economics &amp; Progress <b>5</b></span>
+        <span class="chip mono">Culture &amp; Sci-Fi <b>8</b></span>
+      </div>
+    </div>
   </section>
 
   <footer class="mono">
