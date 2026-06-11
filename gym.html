@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Gym Logger</title>
+<style>
+  :root{--bg:#0f1115;--card:#1a1d24;--line:#2a2f3a;--txt:#e8eaf0;--dim:#8a92a3;--acc:#4f8ef7;--grn:#3fb96a;--amb:#e0a83a;--red:#e05a4e}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--txt);font:16px/1.45 -apple-system,system-ui,sans-serif;padding:max(12px,env(safe-area-inset-top)) 14px 40px}
+  h1{font-size:20px;margin:6px 0 14px}
+  h2{font-size:15px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin:18px 0 8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+  button{font:inherit;border:0;border-radius:12px;cursor:pointer;color:var(--txt)}
+  .big{display:block;width:100%;padding:16px;font-size:17px;font-weight:700;background:var(--acc);margin-bottom:10px}
+  .big.sec{background:var(--card);border:1px solid var(--line)}
+  .row{display:flex;gap:8px;align-items:center}
+  .grow{flex:1}
+  input{font:inherit;background:#11141a;border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:12px;width:100%}
+  .step{width:46px;height:46px;font-size:22px;font-weight:700;background:#252a35;border-radius:12px;flex:none}
+  .val{min-width:64px;text-align:center;font-size:22px;font-variant-numeric:tabular-nums;font-weight:700}
+  .unit{font-size:12px;color:var(--dim);text-align:center}
+  .log{width:100%;height:50px;font-size:17px;font-weight:800;background:var(--grn);margin-top:10px}
+  .ghost{color:var(--dim);font-size:13px;margin:2px 0 8px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{background:#252a35;border-radius:8px;padding:5px 9px;font-size:14px;font-variant-numeric:tabular-nums}
+  .chip.pr{background:var(--amb);color:#1a1505;font-weight:700}
+  .exname{font-weight:700;font-size:17px}
+  .tag{font-size:11px;background:#252a35;color:var(--dim);border-radius:6px;padding:2px 6px;margin-left:6px;vertical-align:2px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .timer{font-variant-numeric:tabular-nums;font-weight:700;color:var(--dim)}
+  #rest{position:fixed;left:14px;right:14px;bottom:14px;background:var(--acc);border-radius:14px;padding:14px;text-align:center;font-size:20px;font-weight:800;display:none;z-index:9}
+  .spark{width:100%;height:54px;margin-top:6px}
+  .muted{color:var(--dim);font-size:13px}
+  .danger{background:transparent;color:var(--red);font-size:14px;padding:10px}
+  .pillrow{display:flex;gap:8px;flex-wrap:wrap}
+  .pill{padding:10px 14px;background:#252a35;border-radius:999px;font-weight:600;font-size:15px}
+  .pill.on{background:var(--acc)}
+  a{color:var(--acc)}
+</style>
+</head>
+<body>
+<div id="app">Loading…</div>
+<div id="rest" onclick="hideRest()">Rest 0:00 — tap to dismiss</div>
+
+<script>
+'use strict';
+/* ============ CONFIG ============ */
+const ATHLETE='i351406', API='https://intervals.icu/api/v1';
+const LOAD=(min,rpe)=>Math.round(min*rpe/6);
+const E1RM=(w,r)=>w*(1+r/30);
+const REST_DEFAULT={L:150,U:90,W:120,S:45};
+// Canonical library. block S = shoulder warm-up (opens every template).
+const LIB={
+ 'Band Pull-Apart':{blk:'S',w:0,bw:true},'Face Pull':{blk:'S',w:0,bw:true},'Y-T-W':{blk:'S',w:5},
+ 'RFESS':{blk:'L',w:25},'Goblet Squat':{blk:'L',w:45},'SLRDL':{blk:'L',w:45},
+ 'Step-Up':{blk:'L',w:25},'KB Swing':{blk:'L',w:45},'Calf Raise':{blk:'L',w:45},
+ 'DB Row':{blk:'U',w:40},'Floor Press':{blk:'U',w:30},'KB Press':{blk:'U',w:25},'Carry':{blk:'U',w:64}
+};
+const TPL={
+ L:['Band Pull-Apart','Face Pull','Y-T-W','RFESS','Goblet Squat','SLRDL','KB Swing','Calf Raise'],
+ U:['Band Pull-Apart','Face Pull','Y-T-W','DB Row','Floor Press','KB Press','Carry'],
+ W:['Band Pull-Apart','Face Pull','Y-T-W','Goblet Squat','DB Row','KB Press','KB Swing','Carry']
+};
+/* ============ STATE ============ */
+let key=localStorage.gymKey||'', hist={}, sess=null, restEnd=0, restTick=null;
+try{sess=JSON.parse(localStorage.gymDraft||'null')}catch(e){sess=null}
+const $=id=>document.getElementById(id);
+const app=()=>$('app');
+/* ============ API ============ */
+async function api(path,opt={}){
+  opt.headers=Object.assign({'Authorization':'Basic '+btoa('API_KEY:'+key)},opt.headers||{});
+  const r=await fetch(API+path,opt);
+  if(!r.ok)throw new Error('API '+r.status);
+  return r.status===200?r.json():null;
+}
+/* ============ HISTORY (parse #gym v1 descriptions) ============ */
+function parseDesc(d){
+  if(!d||!d.startsWith('#gym v1'))return null;
+  const out={};
+  for(const line of d.split('\n').slice(1)){
+    const m=line.match(/^(.+?):\s*(.+)$/); if(!m||m[1]==='template')continue;
+    const sets=[];
+    for(const seg of m[2].trim().split(/\s+/)){
+      const sm=seg.match(/^(BW|[\d.]+)x([\d,]+)$/i); if(!sm)continue;
+      const w=/^bw$/i.test(sm[1])?0:parseFloat(sm[1]);
+      for(const r of sm[2].split(','))if(r)sets.push({w,r:parseInt(r)});
+    }
+    if(sets.length)out[m[1].trim()]=sets;
+  }
+  return Object.keys(out).length?out:null;
+}
+async function loadHistory(){
+  const now=new Date(),old=new Date(now-365*864e5);
+  const list=await api(`/athlete/${ATHLETE}/activities?oldest=${old.toISOString().slice(0,10)}&newest=${now.toISOString().slice(0,10)}`);
+  hist={};
+  list.filter(a=>a.type==='WeightTraining').sort((a,b)=>a.start_date_local<b.start_date_local?-1:1)
+  .forEach(a=>{
+    const p=parseDesc(a.description); if(!p)return;
+    for(const[ex,sets]of Object.entries(p)){
+      hist[ex]=hist[ex]||[];
+      const best=Math.max(...sets.map(s=>s.w?E1RM(s.w,s.r):0));
+      hist[ex].push({date:a.start_date_local.slice(0,10),sets,best});
+    }
+  });
+}
+const lastSets=ex=>(hist[ex]||[]).slice(-1)[0]?.sets||null;
+const prOf=ex=>Math.max(0,...(hist[ex]||[]).map(h=>h.best));
+const fmtSets=sets=>{ // group into "WxR,R,R" segments
+  const segs=[];let cw=null,rs=[];
+  for(const s of sets){const w=s.w?s.w:'BW';
+    if(w!==cw){if(cw!==null)segs.push(cw+'x'+rs.join(','));cw=w;rs=[]} rs.push(s.r);}
+  if(cw!==null)segs.push(cw+'x'+rs.join(','));
+  return segs.join(' ');
+};
+/* ============ VIEWS ============ */
+function render(){ key? (sess?vSession():vHome()) : vSetup(); }
+function vSetup(){
+  app().innerHTML=`<h1>Gym Logger</h1><div class="card">
+   <p class="muted" style="margin-bottom:10px">Paste your intervals.icu API key. Stored only on this device.</p>
+   <input id="k" placeholder="API key" autocomplete="off">
+   <button class="big" style="margin-top:10px" onclick="saveKey()">Save</button></div>`;
+}
+function saveKey(){key=$('k').value.trim();if(!key)return;localStorage.gymKey=key;boot();}
+async function vHome(){
+  app().innerHTML=`<h1>Gym Logger</h1><div class="muted">Loading history…</div>`;
+  try{await loadHistory()}catch(e){app().innerHTML=`<h1>Gym Logger</h1><div class="card">History fetch failed (${e.message}). <a href="#" onclick="localStorage.removeItem('gymKey');location.reload()">Re-enter key</a> or start anyway below.</div>`+homeButtons();return}
+  app().innerHTML=`<h1>Gym Logger</h1>${homeButtons()}<h2>PRs (e1RM)</h2><div class="card">${
+    Object.keys(hist).length? Object.keys(LIB).filter(e=>hist[e]&&prOf(e)>0).map(e=>
+      `<div class="row" style="padding:6px 0" onclick="vChart('${e}')"><div class="grow exname" style="font-size:15px">${e}</div><div class="chip">${Math.round(prOf(e))} lb</div></div>`).join('')||'<span class="muted">No weighted lifts yet.</span>'
+    :'<span class="muted">No sessions logged yet — go lift.</span>'}</div>`;
+}
+const homeButtons=()=>`
+  <button class="big" onclick="start('L')">Start L — Legs / FTP</button>
+  <button class="big sec" onclick="start('U')">Start U — Upper</button>
+  <button class="big sec" onclick="start('W')">Start W — Whole body</button>`;
+function start(t){
+  sess={t,start:Date.now(),ex:TPL[t].map(n=>{
+    const last=lastSets(n),def=LIB[n];
+    const g=last?last.slice(-1)[0]:null;
+    return {n,done:[],w:g?g.w:(def.bw?0:def.w),r:g?g.r:(def.blk==='S'?12:6),ghost:last?fmtSets(last):null};
+  })};
+  save();render();
+}
+function vSession(){
+  const mins=Math.max(1,Math.round((Date.now()-sess.start)/6e4));
+  app().innerHTML=`<div class="topbar"><h1 style="margin:0">Template ${sess.t}</h1><span class="timer" id="stime">${mins} min</span></div>`+
+  sess.ex.map((e,i)=>{
+    const pr=prOf(e.n);
+    return `<div class="card">
+    <div><span class="exname">${e.n}</span><span class="tag">${LIB[e.n]?.blk==='S'?'shoulder':LIB[e.n]?.blk||''}</span></div>
+    ${e.ghost?`<div class="ghost">Last: ${e.ghost}</div>`:`<div class="ghost">First time — defaults loaded</div>`}
+    <div class="row">
+      <button class="step" onclick="adj(${i},'w',-5)">−</button>
+      <div><div class="val">${e.w||'BW'}</div><div class="unit">lb</div></div>
+      <button class="step" onclick="adj(${i},'w',5)">+</button>
+      <div class="grow"></div>
+      <button class="step" onclick="adj(${i},'r',-1)">−</button>
+      <div><div class="val">${e.r}</div><div class="unit">reps</div></div>
+      <button class="step" onclick="adj(${i},'r',1)">+</button>
+    </div>
+    <button class="log" onclick="logSet(${i})">Log set ✓</button>
+    <div class="chips">${e.done.map(s=>{
+      const isPr=s.w&&E1RM(s.w,s.r)>pr;
+      return `<span class="chip${isPr?' pr':''}">${s.w||'BW'}×${s.r}${isPr?' PR':''}</span>`}).join('')}</div>
+   </div>`}).join('')+
+  `<button class="big" style="background:var(--grn)" onclick="vFinish()">Finish session</button>
+   <button class="danger" onclick="if(confirm('Discard session?')){sess=null;localStorage.removeItem('gymDraft');render()}">Discard</button>`;
+  clearInterval(window._st);window._st=setInterval(()=>{const el=$('stime');if(el)el.textContent=Math.max(1,Math.round((Date.now()-sess.start)/6e4))+' min'},15000);
+}
+function adj(i,f,d){const e=sess.ex[i];e[f]=Math.max(f==='w'?0:1,e[f]+d);save();vSession()}
+function logSet(i){const e=sess.ex[i];e.done.push({w:e.w,r:e.r});save();
+  startRest(REST_DEFAULT[LIB[e.n]?.blk==='S'?'S':sess.t]);vSession()}
+function vFinish(){
+  const mins=Math.max(1,Math.round((Date.now()-sess.start)/6e4));
+  app().innerHTML=`<h1>Finish — ${mins} min</h1><div class="card"><h2 style="margin-top:0">Session RPE</h2>
+   <div class="pillrow">${[4,5,6,7,8,9,10].map(r=>`<button class="pill" onclick="post(${r},${mins})">${r}</button>`).join('')}</div>
+   <p class="muted" style="margin-top:10px">Load = ${mins} min × RPE ÷ 6</p></div>
+   <button class="big sec" onclick="vSession()">Back</button>`;
+}
+async function post(rpe,mins){
+  const lines=['#gym v1','template: '+sess.t];
+  for(const e of sess.ex)if(e.done.length)lines.push(`${e.n}: ${fmtSets(e.done)}`);
+  const body={type:'WeightTraining',name:`Strength — ${sess.t}`,
+    start_date_local:new Date(sess.start-new Date(sess.start).getTimezoneOffset()*6e4).toISOString().slice(0,19),
+    moving_time:mins*60,icu_rpe:rpe,icu_training_load:LOAD(mins,rpe),description:lines.join('\n')};
+  app().innerHTML='<h1>Posting…</h1>';
+  try{
+    await api(`/athlete/${ATHLETE}/activities/manual`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const prs=[];for(const e of sess.ex){const pr=prOf(e.n);for(const s of e.done)if(s.w&&E1RM(s.w,s.r)>pr){prs.push(e.n);break}}
+    sess=null;localStorage.removeItem('gymDraft');
+    app().innerHTML=`<h1>Logged ✓</h1><div class="card">${LOAD(mins,rpe)} TSS · ${mins} min · RPE ${rpe}
+      ${prs.length?`<div style="margin-top:8px">🏆 PR: ${prs.join(', ')}</div>`:''}</div>
+      <button class="big" onclick="render()">Done</button>`;
+  }catch(err){
+    app().innerHTML=`<h1>Post failed</h1><div class="card">${err.message}. Session draft kept — retry when you have signal.</div>
+      <button class="big" onclick="post(${rpe},${mins})">Retry</button><button class="big sec" onclick="vSession()">Back</button>`;
+  }
+}
+function vChart(ex){
+  const h=hist[ex]||[];const pts=h.map(x=>x.best);
+  const w=320,ht=50,mx=Math.max(...pts),mn=Math.min(...pts);
+  const path=pts.map((p,i)=>`${i?'L':'M'}${(i/(pts.length-1||1))*w},${ht-((p-mn)/((mx-mn)||1))*ht}`).join(' ');
+  app().innerHTML=`<h1>${ex}</h1><div class="card">
+    <div class="muted">e1RM over ${h.length} sessions · PR ${Math.round(mx)} lb</div>
+    <svg class="spark" viewBox="0 0 ${w} ${ht+4}"><path d="${path}" fill="none" stroke="var(--acc)" stroke-width="2.5"/></svg>
+    ${h.slice(-8).reverse().map(x=>`<div class="row" style="padding:4px 0"><div class="grow muted">${x.date}</div><div class="chip">${fmtSets(x.sets)}</div></div>`).join('')}
+   </div><button class="big sec" onclick="render()">Back</button>`;
+}
+/* ============ REST TIMER ============ */
+function startRest(secs){restEnd=Date.now()+secs*1000;$('rest').style.display='block';
+  clearInterval(restTick);restTick=setInterval(()=>{
+    const left=Math.ceil((restEnd-Date.now())/1000);
+    if(left<=0){$('rest').textContent='Rest done — go';try{navigator.vibrate&&navigator.vibrate(200)}catch(e){};beep();clearInterval(restTick)}
+    else $('rest').textContent=`Rest ${Math.floor(left/60)}:${String(left%60).padStart(2,'0')} — tap to dismiss`;
+  },250);}
+function hideRest(){$('rest').style.display='none';clearInterval(restTick)}
+let _ac;function beep(){try{_ac=_ac||new (window.AudioContext||window.webkitAudioContext)();const o=_ac.createOscillator(),g=_ac.createGain();o.connect(g);g.connect(_ac.destination);o.frequency.value=880;g.gain.value=.15;o.start();o.stop(_ac.currentTime+.25)}catch(e){}}
+/* ============ BOOT ============ */
+const save=()=>localStorage.gymDraft=JSON.stringify(sess);
+async function boot(){render()}
+boot();
+</script>
+</body>
+</html>
