@@ -1,640 +1,259 @@
-<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+<!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
 {
-  "name": "Rundown",
+  "name": "Morning Report",
   "schemaVersion": 1,
-  "description": "Brian's daily Morning Report (\"Rundown\") — curated world/US/Santa Barbara news, AI and clinical-medicine updates, space & astronomy, upcoming local events, Garmin vitals, and a live Google Calendar view of the next 3 days. Regenerated each morning at 5 AM Pacific.",
-  "mcpTools": [
-    "mcp__d84394cf-59e4-4adc-9ecf-f868bd8d6550__list_events"
-  ],
-  "mcpServerNames": [
-    "Google Calendar"
-  ]
+  "description": "Brian's daily Morning Report — curated world/US/Santa Barbara news, AI and clinical-medicine updates, upcoming local events, and a live Google Calendar view of the next 3 days. Regenerated each morning at 5 AM Pacific by a scheduled task.",
+  "mcpTools": ["mcp__d84394cf-59e4-4adc-9ecf-f868bd8d6550__list_events"],
+  "mcpServerNames": ["Google Calendar"]
 }
 </script>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Brian's Morning Report</title>
+<title>The Daily Brian — Stack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
+  :root{
     color-scheme: dark;
-    --bg:      #07080b;
-    --bg2:     #0b0d12;
-    --panel:   #0e1117;
-    --ink:     #eef1f6;
-    --muted:   #79828f;
-    --faint:   #3a414d;
-    --line:    #181d27;
-    --line2:   #222a37;
-    --accent:  #3f6dff;   /* sharp midnight blue */
-    --accent2: #6f93ff;
-    --accent-dim: #16224a;
-    --maxw: 760px;
+    --bg:#0d1012;
+    --panel:#11161a;
+    --ink:#e8eded;
+    --soft:#aeb8b9;
+    --muted:#6c7a7c;
+    --faint:#384244;
+    --line:#1b2225;
+    --line2:#273033;
+    --blue:#6276d8;
+    --blue-deep:#3a4aad;
+    --blue-dim:#141b3a;
   }
-  * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0;
-    background:
-      radial-gradient(1200px 600px at 80% -10%, #0c1428 0%, rgba(12,20,40,0) 55%),
-      var(--bg);
-    color: var(--ink);
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;
   }
+  .gro{font-family:"Space Grotesk",sans-serif;}
+  .wrap{max-width:480px;margin:0 auto;padding:0 0 72px;}
 
-  /* faint blueprint grid wash behind everything */
-  body::before {
-    content: "";
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image:
-      linear-gradient(var(--line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line) 1px, transparent 1px);
-    background-size: 38px 38px;
-    opacity: .35;
-    mask-image: radial-gradient(120% 90% at 50% 0%, #000 30%, transparent 90%);
-    -webkit-mask-image: radial-gradient(120% 90% at 50% 0%, #000 30%, transparent 90%);
-  }
+  /* masthead — stacked typographic play */
+  .mast{padding:44px 22px 26px;padding-left:max(22px,env(safe-area-inset-left));border-bottom:1px solid var(--line2);}
+  .mast h1{margin:0;text-transform:uppercase;line-height:.84;letter-spacing:-3px;
+    font-size:clamp(62px,21vw,88px);font-weight:700;}
+  .mast h1 .l1{display:block;font-family:"Space Grotesk",sans-serif;font-size:.22em;font-weight:500;
+    letter-spacing:.55em;color:var(--muted);margin-bottom:14px;}
+  .mast h1 .l2{display:block;color:var(--ink);}
+  .mast h1 .l3{display:block;color:var(--blue-deep);}
+  .mdate{display:flex;align-items:center;gap:12px;margin-top:24px;
+    font-family:"Space Grotesk",sans-serif;font-size:11px;font-weight:500;
+    letter-spacing:2px;text-transform:uppercase;color:var(--soft);white-space:nowrap;}
+  .mdate::before{content:"";width:28px;height:1px;background:var(--blue);flex:0 0 auto;}
 
-  .mono { font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace; }
+  /* sections — vertical spine rail */
+  section{display:grid;grid-template-columns:42px 1fr;margin-top:34px;border-top:1px solid var(--line2);}
+  .rail{border-right:1px solid var(--line2);display:flex;flex-direction:column;align-items:center;
+    gap:16px;padding:14px 0 12px;}
+  .rail .ridx{font-family:"Space Grotesk",sans-serif;font-size:11px;font-weight:600;color:var(--blue);
+    border:1px solid var(--blue-dim);background:rgba(98,118,216,.1);padding:3px 6px;
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,0 100%);}
+  .rail .rname{writing-mode:vertical-rl;transform:rotate(180deg);
+    font-family:"Space Grotesk",sans-serif;font-size:11px;font-weight:500;
+    letter-spacing:3.5px;text-transform:uppercase;color:var(--ink);}
+  .rail .rtag{writing-mode:vertical-rl;transform:rotate(180deg);margin-top:auto;
+    font-family:"Space Grotesk",sans-serif;font-size:9px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--faint);white-space:nowrap;}
+  .sb{padding:14px 22px 4px 18px;padding-right:max(22px,env(safe-area-inset-right));min-width:0;}
 
-  .wrap {
-    position: relative; z-index: 1;
-    max-width: var(--maxw); margin: 0 auto;
-    padding: 18px 16px 72px;
-    padding-left: max(16px, env(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
-  }
+  .story{padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--line);}
+  .story:last-child{margin-bottom:0;border-bottom:none;padding-bottom:14px;}
+  .story h3{margin:0 0 7px;font-size:20px;line-height:1.16;font-weight:700;letter-spacing:-.3px;color:var(--ink);text-wrap:balance;}
+  .story p{margin:0;font-size:15px;color:var(--soft);text-wrap:pretty;}
+  .story .src{display:block;margin-top:9px;font-family:"Space Grotesk",sans-serif;
+    font-size:10px;font-weight:500;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
 
-  /* ---------- system bar ---------- */
-  .sysbar {
-    display: flex; align-items: center; gap: 10px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--muted);
-    border: 1px solid var(--line2); border-radius: 6px;
-    padding: 8px 11px; background: rgba(13,17,24,.6);
-    backdrop-filter: blur(4px);
-  }
-  .sysbar .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
-    box-shadow: 0 0 9px var(--accent); flex: 0 0 auto; animation: pulse 2.4s infinite; }
-  @keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
-  .sysbar .sep { color: var(--faint); }
-  .sysbar .grow { margin-left: auto; }
+  /* events */
+  .ev{display:grid;grid-template-columns:50px 1fr;gap:14px;padding:13px 0;border-bottom:1px solid var(--line);}
+  .ev:last-child{border-bottom:none;}
+  .ev .d .n{font-family:"Space Grotesk",sans-serif;font-size:24px;font-weight:700;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums;}
+  .ev .d .m{font-family:"Space Grotesk",sans-serif;font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-top:4px;}
+  .ev h4{margin:0 0 3px;font-size:16px;font-weight:600;color:var(--ink);}
+  .ev p{margin:0;font-size:13px;color:var(--muted);text-wrap:pretty;}
 
-  /* ---------- masthead ---------- */
-  .masthead { margin: 26px 0 6px; }
-  .masthead .kicker {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 10.5px; letter-spacing: 4px; text-transform: uppercase;
-    color: var(--accent2); margin-bottom: 8px;
-  }
-  .masthead h1 {
-    margin: 0; font-weight: 800; line-height: .92;
-    font-size: clamp(44px, 16vw, 92px);
-    letter-spacing: -1.5px; text-transform: uppercase;
-    background: linear-gradient(180deg, #ffffff 0%, #b7c0d4 100%);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  .masthead h1 .thin { display:block; font-weight: 300; letter-spacing: 6px; font-size: .26em;
-    color: var(--muted); -webkit-text-fill-color: var(--muted); margin-top: 12px; }
+  /* calendar */
+  .cday{margin-bottom:16px;}
+  .cday h4{margin:0 0 9px;font-family:"Space Grotesk",sans-serif;font-size:11px;font-weight:600;
+    text-transform:uppercase;letter-spacing:2.5px;color:var(--blue);
+    padding-bottom:7px;border-bottom:1px solid var(--line2);}
+  .ci{display:grid;grid-template-columns:78px 1fr;gap:12px;padding:6px 0;font-size:15px;align-items:baseline;}
+  .ci .t{font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:500;color:var(--blue);font-variant-numeric:tabular-nums;}
+  .ci .x{color:var(--ink);}
+  .ci .loc{color:var(--muted);font-size:12px;}
+  .cstat{font-family:"Space Grotesk",sans-serif;font-size:10.5px;color:var(--muted);margin-top:8px;letter-spacing:.6px;}
 
-  /* ---------- metrics strip ---------- */
-  .metrics {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px;
-    margin-top: 18px; background: var(--line2);
-    border: 1px solid var(--line2); border-radius: 8px; overflow: hidden;
-  }
-  .metric { background: var(--panel); padding: 11px 12px; }
-  .metric .k { font-family: ui-monospace, Menlo, monospace; font-size: 9px; letter-spacing: 1.5px;
-    text-transform: uppercase; color: var(--muted); }
-  .metric .v { font-family: ui-monospace, Menlo, monospace; font-size: 15px; color: var(--ink); margin-top: 3px;
-    font-variant-numeric: tabular-nums; }
-  .metric .v b { color: var(--accent2); font-weight: 600; }
-  @media (max-width: 480px){
-    .metrics { grid-template-columns: repeat(2, 1fr); }
-  }
+  /* digest */
+  .dnote{font-family:"Space Grotesk",sans-serif;font-size:11.5px;color:var(--muted);line-height:1.6;margin-bottom:16px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{font-family:"Space Grotesk",sans-serif;font-size:11px;font-weight:500;letter-spacing:.4px;
+    color:var(--soft);border:1px solid var(--line2);padding:6px 11px;background:var(--panel);
+    clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,0 100%);}
+  .chip b{color:var(--blue);font-weight:600;margin-left:4px;}
 
-  /* ---------- sections ---------- */
-  section { margin-top: 38px; position: relative; }
-  .section-head {
-    display: flex; align-items: baseline; gap: 12px;
-    border-bottom: 1px solid var(--line2); padding-bottom: 9px; margin-bottom: 18px;
-  }
-  .section-head .idx {
-    font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--accent);
-    letter-spacing: 1px;
-  }
-  .section-head .name {
-    font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
-    letter-spacing: 3px; font-size: 13px; font-weight: 600; color: var(--ink);
-  }
-  .section-head .tag {
-    margin-left: auto; font-family: ui-monospace, Menlo, monospace;
-    font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--accent2); border: 1px solid var(--accent-dim);
-    background: rgba(63,109,255,.08);
-    padding: 3px 8px; border-radius: 4px; white-space: nowrap;
-  }
-
-  .story {
-    position: relative; padding: 2px 0 16px 16px; margin-bottom: 16px;
-    border-left: 2px solid var(--line2);
-  }
-  .story::before {
-    content: ""; position: absolute; left: -2px; top: 4px; width: 2px; height: 20px;
-    background: var(--accent); box-shadow: 0 0 8px var(--accent);
-  }
-  .story:last-child { margin-bottom: 0; }
-  .story h3 { margin: 0 0 5px; font-size: 19px; line-height: 1.22; font-weight: 700; letter-spacing: -.2px; color: var(--ink); }
-  .story p { margin: 0; font-size: 15px; color: #c4ccd8; }
-  .story .src {
-    display: inline-block; margin-top: 7px;
-    font-family: ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: .5px;
-    color: var(--muted); font-style: normal;
-  }
-  .story .src::before { content: "▟ "; color: var(--accent); }
-  .story a { color: var(--accent2); text-decoration: none; }
-  .story a:hover { text-decoration: underline; }
-
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  @media (max-width: 600px){ .two-col { grid-template-columns: 1fr; gap: 0; } }
-
-  /* ---------- calendar ---------- */
-  .cal-day { margin-bottom: 16px; }
-  .cal-day h4 {
-    margin: 0 0 8px; font-family: ui-monospace, Menlo, monospace;
-    font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
-    color: var(--accent2); border-bottom: 1px dashed var(--line2); padding-bottom: 5px;
-  }
-  .cal-item { display: flex; gap: 12px; padding: 5px 0; font-size: 15px; align-items: baseline; }
-  .cal-item .time { flex: 0 0 86px; color: var(--accent); font-family: ui-monospace, Menlo, monospace;
-    font-size: 12.5px; font-variant-numeric: tabular-nums; letter-spacing: .5px; }
-  .cal-item .ttl { flex: 1; color: var(--ink); }
-  .cal-item .loc { color: var(--muted); font-size: 12px; }
-  .cal-status { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--muted);
-    margin-top: 6px; letter-spacing: .5px; }
-
-  /* ---------- upcoming events ---------- */
-  .ev { display: flex; gap: 14px; margin-bottom: 12px; align-items: stretch; }
-  .ev .date {
-    flex: 0 0 52px; text-align: center; background: var(--panel);
-    border: 1px solid var(--line2); border-radius: 6px; padding: 6px 0; line-height: 1.05;
-  }
-  .ev .date .d { font-family: ui-monospace, Menlo, monospace; font-size: 21px; font-weight: 700; color: var(--ink); }
-  .ev .date .m { font-family: ui-monospace, Menlo, monospace; font-size: 9px; text-transform: uppercase;
-    letter-spacing: 1.5px; color: var(--accent); margin-top: 2px; }
-  .ev .body { padding-top: 2px; }
-  .ev .body h4 { margin: 0 0 2px; font-size: 15.5px; font-weight: 650; color: var(--ink); }
-  .ev .body p { margin: 0; font-size: 13px; color: var(--muted); }
-
-  footer {
-    margin-top: 52px; border-top: 1px solid var(--line2); padding-top: 16px;
-    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; letter-spacing: 1px;
-    color: var(--faint); text-transform: uppercase; display: flex; gap: 8px; flex-wrap: wrap;
-  }
-  footer .grow { margin-left: auto; }
-
-  /* ---------- substack digest ---------- */
-  .dig-note { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--muted);
-    letter-spacing: .3px; margin: -6px 0 18px; line-height: 1.5; }
-  .theme { margin-bottom: 22px; }
-  .theme > .t-head {
-    display: flex; align-items: center; gap: 9px; margin-bottom: 10px;
-  }
-  .theme > .t-head .t-name {
-    font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--accent2); font-weight: 600;
-  }
-  .theme > .t-head .t-rule { flex: 1; height: 1px; background: var(--line2); }
-  .theme > .t-head .t-count { font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
-    letter-spacing: 1px; color: var(--muted); }
-  .dig-item { padding: 0 0 12px 14px; margin-bottom: 12px; border-left: 2px solid var(--line2); position: relative; }
-  .dig-item:last-child { margin-bottom: 0; }
-  .dig-item.fresh::before { content: ""; position: absolute; left: -2px; top: 3px; width: 2px; height: 16px;
-    background: var(--accent); box-shadow: 0 0 8px var(--accent); }
-  .dig-item h4 { margin: 0 0 3px; font-size: 15.5px; font-weight: 650; line-height: 1.25; color: var(--ink); }
-  .dig-item .by { font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; letter-spacing: .5px;
-    color: var(--muted); }
-  .dig-item .new { color: var(--accent); }
-  .dig-item p { margin: 4px 0 0; font-size: 14px; color: #c4ccd8; }
-  .cov { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
-  .cov .chip { font-family: ui-monospace, Menlo, monospace; font-size: 10px; letter-spacing: .5px;
-    color: var(--muted); border: 1px solid var(--line2); border-radius: 20px; padding: 4px 10px;
-    background: rgba(13,17,24,.5); }
-  .cov .chip b { color: var(--accent2); font-weight: 600; }
-
-  /* ---------- blueprint margin art (wide screens only) ---------- */
-  .blueprint { position: fixed; top: 0; height: 100vh; width: 120px; z-index: 0; pointer-events: none;
-    opacity: .5; display: none; }
-  .blueprint.left { left: 0; }
-  .blueprint.right { right: 0; }
-  @media (min-width: 1080px){ .blueprint { display: block; } }
+  footer{margin:44px 22px 0;padding-top:14px;border-top:1px solid var(--blue);
+    font-family:"Space Grotesk",sans-serif;font-size:10px;font-weight:500;letter-spacing:1.8px;
+    color:var(--faint);text-transform:uppercase;display:flex;gap:8px;}
+  footer .grow{margin-left:auto;}
 </style>
 </head>
 <body>
-
-<!-- blueprint line art, margins (desktop) -->
-<svg class="blueprint left" viewBox="0 0 120 900" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#23304f" stroke-width="1">
-  <line x1="60" y1="0" x2="60" y2="900"/>
-  <circle cx="60" cy="120" r="26"/><circle cx="60" cy="120" r="12"/>
-  <line x1="34" y1="120" x2="0" y2="120"/><line x1="86" y1="120" x2="120" y2="120"/>
-  <rect x="40" y="300" width="40" height="40"/><line x1="40" y1="300" x2="80" y2="340"/>
-  <text x="50" y="370" fill="#3f6dff" font-family="monospace" font-size="8">SEC.02</text>
-  <circle cx="60" cy="520" r="4" fill="#3f6dff" stroke="none"/>
-  <path d="M60 520 L60 620 L20 660"/>
-  <rect x="30" y="700" width="60" height="90"/><line x1="30" y1="730" x2="90" y2="730"/>
-  <text x="36" y="722" fill="#516089" font-family="monospace" font-size="7">34.42N</text>
-</svg>
-<svg class="blueprint right" viewBox="0 0 120 900" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#23304f" stroke-width="1">
-  <line x1="60" y1="0" x2="60" y2="900"/>
-  <rect x="34" y="80" width="52" height="70"/><line x1="34" y1="115" x2="86" y2="115"/><line x1="60" y1="80" x2="60" y2="150"/>
-  <text x="40" y="74" fill="#516089" font-family="monospace" font-size="7">119.70W</text>
-  <circle cx="60" cy="320" r="30"/><path d="M60 290 L60 350 M30 320 L90 320"/>
-  <path d="M30 480 L90 480 L60 540 Z"/>
-  <line x1="0" y1="640" x2="120" y2="640" stroke-dasharray="3 4"/>
-  <circle cx="60" cy="760" r="18"/><circle cx="60" cy="760" r="6" fill="#3f6dff" stroke="none"/>
-  <text x="44" y="800" fill="#3f6dff" font-family="monospace" font-size="8">PT/05:00</text>
-</svg>
-
 <div class="wrap">
 
-  <!-- system bar -->
-  <div class="sysbar mono">
-    <span class="dot"></span>
-    <span>SYS//RUNDOWN</span>
-    <span class="sep">/</span>
-    <span>SANTA BARBARA · CA</span>
-    <span class="grow">REL 2035.6</span>
-  </div>
+  <header class="mast">
+    <h1><span class="l1">The</span><span class="l2">Daily</span><span class="l3">Brian</span></h1>
+    <div class="mdate"><span id="edition-date">Wednesday, June 10, 2026</span></div>
+  </header>
 
-  <!-- masthead -->
-  <div class="masthead">
-    <div class="kicker mono">Morning Edition · Encrypted Personal Feed</div>
-    <h1>Rundown<span class="thin" id="edition-date">Wednesday, June 10, 2026</span></h1>
-  </div>
-
-  <!-- metrics strip -->
-  <div class="metrics">
-    <div class="metric"><div class="k mono">Feeds</div><div class="v mono"><b>08</b></div></div>
-    <div class="metric"><div class="k mono">Briefs</div><div class="v mono"><b>13</b></div></div>
-  </div>
-
-  <!-- WORLD -->
   <section>
-    <div class="section-head">
-      <span class="idx mono">01</span><span class="name">World</span>
-      <span class="tag">3 Stories</span>
-    </div>
-    <div class="story">
-      <h3>Strikes flare near the Strait of Hormuz as US and Iran trade fire</h3>
-      <p>Iran's Revolutionary Guard said it launched missiles at US military bases in Bahrain, Kuwait and Jordan after American forces struck Iranian ports, islands and sites near the Strait of Hormuz, in a sharp escalation of the spring's on-again, off-again confrontation. Jordan said it intercepted five missiles aimed at its Azraq airbase, while Bahrain and Kuwait activated air defenses; the exchange threatens shipping through the world's most important oil chokepoint.</p>
-      <span class="src mono">Al Jazeera · Reuters</span>
-    </div>
-    <div class="story">
-      <h3>Anti-immigration unrest spreads across Northern Ireland and the UK</h3>
-      <p>Masked crowds set vehicles, barricades and homes alight in Ballymena and other towns after a man believed to be from Sudan was charged with attempted murder over a knife attack in the region. Protests rippled to other parts of the UK as police struggled to contain a third night of disorder.</p>
-      <span class="src mono">NBC News · Reuters</span>
-    </div>
-    <div class="story">
-      <h3>Pope Leo XIV celebrates Mass at Barcelona's Sagrada Família</h3>
-      <p>The pope is set to lead a Mass at the long-unfinished Sagrada Família basilica, drawing huge crowds to Antoni Gaudí's landmark as it nears structural completion. It is a high-profile stop on a European trip that has put the new pontiff's tone and priorities on display.</p>
-      <span class="src mono">NBC News</span>
+    <div class="rail"><span class="ridx">01</span><span class="rname">World</span><span class="rtag">3 stories</span></div>
+    <div class="sb">
+      <div class="story"><h3>U.S. House passes major Ukraine aid and Russia sanctions package</h3><p>The House passed legislation providing more than $1 billion in security and reconstruction aid and unlocking another $8 billion in defense loans for Ukraine, while sanctioning key sectors of Russia's economy. Putin responded that Russia will strengthen its air defenses after Ukrainian drone strikes reached deep inside the country.</p><span class="src">10 Things / Go Local</span></div>
+      <div class="story"><h3>Hezbollah rejects U.S.-backed Israel&ndash;Lebanon ceasefire terms</h3><p>Secretary-General Naim Qassem called the proposed outcome &ldquo;humiliating,&rdquo; leaving implementation of the truce uncertain. Further talks are scheduled for June 22.</p><span class="src">World Today Journal</span></div>
+      <div class="story"><h3>U.S. sanctions Cuban president as Trump escalates pressure</h3><p>Washington imposed new sanctions on President Miguel D&iacute;az-Canel, his wife, and relatives of former leader Ra&uacute;l Castro, as Trump renewed threats of military action against the island.</p><span class="src">World Today Journal</span></div>
     </div>
   </section>
 
-  <!-- UNITED STATES -->
   <section>
-    <div class="section-head">
-      <span class="idx mono">02</span><span class="name">United States</span>
-      <span class="tag">2 Stories</span>
-    </div>
-    <div class="two-col">
-      <div class="story">
-        <h3>House passes $70B immigration-enforcement package</h3>
-        <p>The House approved roughly $70 billion for immigration enforcement, locking in ICE funding through the rest of the president's term. The bill underscores a GOP caucus still squarely behind the administration's immigration agenda and now heads to a contested Senate.</p>
-        <span class="src mono">Fox News · NBC News</span>
-      </div>
-      <div class="story">
-        <h3>Primary night reshapes 2026 governor races</h3>
-        <p>Nevada Gov. Joe Lombardo cruised past six GOP challengers and will face Democratic AG Aaron Ford in November, while in California, Trump-backed Steve Hilton advanced to a general-election showdown with former Biden cabinet secretary Xavier Becerra.</p>
-        <span class="src mono">Fox News</span>
-      </div>
+    <div class="rail"><span class="ridx">02</span><span class="rname">United States</span><span class="rtag">2 stories</span></div>
+    <div class="sb">
+      <div class="story"><h3>House breaks with Trump twice in one week</h3><p>The Ukraine-aid vote was the chamber's second major foreign-policy rebuke of the White House this week, after lawmakers also approved a war-powers resolution aimed at halting U.S. military action against Iran &mdash; a sign of widening intraparty friction.</p><span class="src">10 Things / Go Local</span></div>
+      <div class="story"><h3>Dow jumps 875 points; Lululemon sinks on weak outlook</h3><p>The Dow rose 1.73% to 51,562, led by UnitedHealth, Goldman Sachs and Merck, though a soft Broadcom forecast pressured AI shares and left the Nasdaq slightly lower. Lululemon fell more than 11% after cutting full-year guidance.</p><span class="src">Trading Economics</span></div>
     </div>
   </section>
 
-  <!-- SANTA BARBARA -->
   <section>
-    <div class="section-head">
-      <span class="idx mono">03</span><span class="name">Santa Barbara · CA</span>
-      <span class="tag">Local</span>
-    </div>
-    <div class="story">
-      <h3>Santa Barbara County hosts two World Cup squads as watch parties roll out</h3>
-      <p>With the 2026 World Cup kicking off Thursday, the Austrian national team is training at UC Santa Barbara's Harder Stadium and Qatar's squad at Westmont College. Noozhawk rounded up county watch parties running June 11 through July 19, from downtown bars to community venues, for fans who want to catch the matches locally.</p>
-      <span class="src mono">Noozhawk</span>
+    <div class="rail"><span class="ridx">03</span><span class="rname">Santa Barbara</span><span class="rtag">Local</span></div>
+    <div class="sb">
+      <div class="story"><h3>County certifies primary winners: Steyer, Measure A, Greene</h3><p>Updated returns show Tom Steyer leading the county in the governor's primary, Measure A passing, and Chief Deputy Melinda Greene set to take over the clerk-recorder-assessor's office from longtime incumbent Joe Holland. Capps, Hart and Slattery also posted decisive wins. Downtown's revamped &ldquo;The Grand On State&rdquo; celebrated its grand opening at 1218 State St.</p><span class="src">SB Independent / Noozhawk</span></div>
     </div>
   </section>
 
-  <!-- AI -->
   <section>
-    <div class="section-head">
-      <span class="idx mono">04</span><span class="name">Artificial Intelligence</span>
-      <span class="tag">High-Impact</span>
-    </div>
-    <div class="story">
-      <h3>Apple's WWDC keynote leans hard into a rebuilt Siri</h3>
-      <p>Apple used its WWDC 2026 keynote to unveil an overhauled, conversational Siri powered by the latest Apple Intelligence — in partnership with Google — adding natural back-and-forth dialogue, on-screen context awareness, image editing and a dedicated Siri app with conversation history. It is Apple's clearest attempt yet to catch up on assistant AI.</p>
-      <span class="src mono">Scientific American · Tech Startups</span>
-    </div>
-    <div class="story">
-      <h3>SpaceX IPO pitch centers on orbital AI data centers</h3>
-      <p>Reports on SpaceX's expected blockbuster IPO say the pitch leans on space-based compute and orbital AI data centers tied to Elon Musk's xAI ambitions — framing the launch company as an AI-infrastructure play, not just a rocket business. The filing lands amid a broader rush of AI firms toward public markets.</p>
-      <span class="src mono">Tech Startups</span>
+    <div class="rail"><span class="ridx">04</span><span class="rname">Artificial Intelligence</span><span class="rtag">High-Impact</span></div>
+    <div class="sb">
+      <div class="story"><h3>Microsoft debuts MAI-Code-1-Flash at Build</h3><p>At its Build developer conference, Microsoft unveiled MAI-Code-1-Flash &mdash; its first in-house model that turns written descriptions into application and website source code &mdash; part of a broader push to lower developer costs and lessen reliance on OpenAI.</p><span class="src">CNBC</span></div>
+      <div class="story"><h3>OpenAI extends GPT-Rosalind, ships &ldquo;Codex for every role&rdquo;</h3><p>OpenAI rolled out new GPT-Rosalind capabilities and broadened Codex across roles, tools and workflows, intensifying the coding-model race against Microsoft, Google's Gemini 3.5 line, and Anthropic.</p><span class="src">OpenAI</span></div>
     </div>
   </section>
 
-  <!-- MEDICINE -->
   <section>
-    <div class="section-head">
-      <span class="idx mono">05</span><span class="name">Medicine</span>
-      <span class="tag">Clinical</span>
-    </div>
-    <div class="story">
-      <h3>FDA clears the first oral GLP-1 pill for weight management</h3>
-      <p>The FDA approved oral semaglutide for chronic weight management, the first GLP-1 pill cleared for obesity, on the strength of the Phase 3 OASIS 4 trial — which showed 16.6% mean weight loss at 64 weeks with full adherence versus 2.7% for placebo, with about a third of adherent patients losing at least 20%. A pill option could widen access and adherence beyond injectables, though dosing-window and cost questions remain.</p>
-      <span class="src mono">Applied Clinical Trials · MedCentral</span>
-    </div>
-    <div class="story">
-      <h3>Cardiology keeps moving obesity to the center of CV care</h3>
-      <p>Reviews out this spring describe cardiology increasingly treating obesity as a primary cardiovascular target, citing GLP-1 benefits in heart failure with preserved ejection fraction (the STEP-HFpEF program) alongside established atherosclerosis risk factors. The shift nudges clinicians toward earlier weight-centered treatment in cardiometabolic disease.</p>
-      <span class="src mono">PMC / review · STEP-HFpEF</span>
+    <div class="rail"><span class="ridx">05</span><span class="rname">Medicine</span><span class="rtag">Clinical</span></div>
+    <div class="sb">
+      <div class="story"><h3>Phase 3 brepocitinib could be first drug approved for dermatomyositis</h3><p>The VALOR trial in NEJM showed the TYK2/JAK1 inhibitor brepocitinib significantly improved disease response in dermatomyositis, a condition long managed with chronic steroids. The FDA granted Priority Review with a Q3 2026 decision date &mdash; potentially the first therapy specifically approved for the disease.</p><span class="src">NEJM &middot; VALOR Phase 3</span></div>
+      <div class="story"><h3>Zanidatamab regimen sets survival mark in HER2+ stomach/esophageal cancer</h3><p>Phase 3 HERIZON-GEA-01, published in NEJM, showed zanidatamab plus chemotherapy (with or without tislelizumab) delivered durable progression-free and overall survival gains as first-line treatment for HER2-positive advanced gastroesophageal adenocarcinoma &mdash; reshaping the first-line standard.</p><span class="src">NEJM &middot; Phase 3</span></div>
     </div>
   </section>
 
-  <!-- SPACE & ASTRONOMY -->
   <section>
-    <div class="section-head">
-      <span class="idx mono">06</span><span class="name">Space &amp; Astronomy</span>
-      <span class="tag">Cosmos</span>
-    </div>
-    <div class="story">
-      <h3>NASA names its next Artemis crew</h3>
-      <p>NASA introduced the astronauts assigned to its next Artemis flight, a mission set to demonstrate Orion's rendezvous and docking with test versions of the commercial human landing systems being built by Blue Origin and SpaceX. The named crew includes veterans Randy Bresnik and ESA's Luca Parmitano alongside Frank Rubio and Andre Douglas.</p>
-      <span class="src mono">NASA</span>
-    </div>
-    <div class="story">
-      <h3>Roman Space Telescope eyes ~100,000 new exoplanets</h3>
-      <p>NASA's Nancy Grace Roman Space Telescope — now targeting an earlier launch as soon as September 2026 — could discover on the order of 100,000 exoplanets, far more than all prior missions combined, through wide-field microlensing surveys. It would transform the statistics of how common worlds like ours really are.</p>
-      <span class="src mono">Space.com · NASA</span>
-    </div>
-    <div class="story">
-      <h3>NASA's X-59 quiet supersonic jet breaks the sound barrier</h3>
-      <p>The experimental X-59 went supersonic for the first time on June 5, reaching about Mach 1.1 in a flight aimed at producing a soft "thump" instead of a sonic boom. The data feeds NASA's case for lifting bans on overland supersonic passenger flight.</p>
-      <span class="src mono">Space.com · NASA</span>
+    <div class="rail"><span class="ridx">06</span><span class="rname">Upcoming &middot; SB</span><span class="rtag">You &amp; Family</span></div>
+    <div class="sb">
+      <div class="ev"><div class="d"><div class="n">06</div><div class="m">Jun</div></div><div><h4>World Oceans Day &mdash; free at the Sea Center</h4><p>Free admission to the Sea Center on Stearns Wharf; hands-on tide pools and touch tanks for kids.</p></div></div>
+      <div class="ev"><div class="d"><div class="n">13</div><div class="m">Jun</div></div><div><h4>SYV Pride Parade &amp; Festival &mdash; Solvang</h4><p>11am&ndash;4pm parade through downtown Solvang plus live music, food, bounce houses and face painting &mdash; all ages.</p></div></div>
+      <div class="ev"><div class="d"><div class="n">19</div><div class="m">Jun</div></div><div><h4>Juneteenth Block Party &mdash; Plaza del Mar</h4><p>11am&ndash;6pm free community celebration at Plaza del Mar / Band Shell Park.</p></div></div>
+      <div class="ev"><div class="d"><div class="n">20</div><div class="m">Jun</div></div><div><h4>Summer Solstice Celebration &amp; Parade</h4><p>June 19&ndash;21, 52nd year. The parade up Santa Barbara St. on the 20th ends at Alameda Park with music, food and a beer &amp; wine garden.</p></div></div>
+      <div class="ev"><div class="d"><div class="n">27</div><div class="m">Jun</div></div><div><h4>Santa Barbara Lavender Festival &mdash; SBCC</h4><p>Arts-and-crafts festival at SBCC's Great Meadow with 75+ artisans and small businesses.</p></div></div>
+      <div class="ev"><div class="d"><div class="n">&bull;</div><div class="m">Jun</div></div><div><h4>Butterflies Alive! &amp; sunset harbor kayaking</h4><p>Walk through ~1,000 live butterflies at the Museum of Natural History; beginner-friendly evening kayak tours run nightly from the harbor.</p></div></div>
     </div>
   </section>
 
-  <!-- UPCOMING SB EVENTS -->
   <section>
-    <div class="section-head">
-      <span class="idx mono">07</span><span class="name">Upcoming · SB</span>
-      <span class="tag">You &amp; Family</span>
-    </div>
-    <div class="ev">
-      <div class="date"><div class="d">13</div><div class="m">Jun</div></div>
-      <div class="body"><h4>SYV Pride Parade &amp; Festival &mdash; Solvang</h4><p>11am&ndash;4pm parade through downtown Solvang with live music, food, bounce houses and face painting &mdash; all ages.</p></div>
-    </div>
-    <div class="ev">
-      <div class="date"><div class="d">19</div><div class="m">Jun</div></div>
-      <div class="body"><h4>Juneteenth Block Party &mdash; Plaza del Mar</h4><p>11am&ndash;6pm free community celebration with live performances, a Black Artisan Market, kids zone and beer/wine garden.</p></div>
-    </div>
-    <div class="ev">
-      <div class="date"><div class="d">19</div><div class="m">Jun</div></div>
-      <div class="body"><h4>Summer Solstice Celebration &amp; Parade &mdash; Alameda Park</h4><p>June 19&ndash;21; one of the county's largest art events, with the parade up State Street, costumes, performances, a wine garden and arts village.</p></div>
-    </div>
-    <div class="ev">
-      <div class="date"><div class="d">27</div><div class="m">Jun</div></div>
-      <div class="body"><h4>Lavender Festival &mdash; Great Meadow, SBCC</h4><p>Arts &amp; crafts festival with 75+ artisans and small businesses, lavender farms and family activities.</p></div>
-    </div>
-    <div class="ev">
-      <div class="date"><div class="d">--</div><div class="m">Jun</div></div>
-      <div class="body"><h4>Butterflies Alive! &mdash; SB Museum of Natural History</h4><p>Open daily through June: walk a garden alive with nearly 1,000 free-flying butterflies &mdash; an easy outing with kids.</p></div>
-    </div>
-    <div class="ev">
-      <div class="date"><div class="d">11</div><div class="m">Jul</div></div>
-      <div class="body"><h4>Jackalope Art &amp; Craft Fair &mdash; Alameda Park</h4><p>July 11&ndash;12 artisan market with handmade goods, local food vendors, live music and family activities.</p></div>
+    <div class="rail"><span class="ridx">07</span><span class="rname">Your Next 3 Days</span><span class="rtag" id="cal-tag">Calendar</span></div>
+    <div class="sb">
+      <div id="calendar">
+        <div class="cday"><h4>Friday, June 5</h4>
+          <div class="ci"><span class="t">8:00 AM</span><span class="x">Class party</span></div>
+          <div class="ci"><span class="t">12:00 PM</span><span class="x">Meeting with Ali and Kendra</span></div>
+        </div>
+        <div class="cday"><h4>Saturday, June 6</h4>
+          <div class="ci"><span class="t">All day</span><span class="x">Guapa Birthday</span></div>
+          <div class="ci"><span class="t">12:20 PM</span><span class="x">YMCA Swimming</span></div>
+          <div class="ci"><span class="t">5:00 PM</span><span class="x">Secret Bao <span class="loc">&middot; 1201 Anacapa St</span></span></div>
+        </div>
+        <div class="cday"><h4>Sunday, June 7</h4>
+          <div class="ci"><span class="t">All day</span><span class="x">Janis Bday</span></div>
+          <div class="ci"><span class="t">3:00 PM</span><span class="x">Measurements</span></div>
+        </div>
+      </div>
+      <div class="cstat" id="cal-status">Showing last saved schedule. Connecting to Google Calendar&hellip;</div>
     </div>
   </section>
 
-  <!-- VITALS -->
   <section>
-    <div class="section-head">
-      <span class="idx mono">08</span><span class="name">Vitals</span>
-      <span class="tag">Garmin &middot; Synced 04:46 PT</span>
-    </div>
-    <div class="theme">
-      <div class="dig-item">
-        <h4>HRV &middot; 87 ms &middot; Balanced</h4>
-        <div class="by mono">7-day baseline 82 ms &middot; 90% night coverage &middot; last reading Jun 7</div>
-      </div>
-      <div class="dig-item">
-        <h4>Cycling &middot; 0 mi this week &middot; 0 rides</h4>
-        <div class="by mono">No rides logged in the last 7 days &middot; down 53.4 mi from the prior week</div>
-      </div>
-    </div>
-    <div class="cov">
-      <span class="chip mono">Readiness <b>51</b> &middot; Moderate</span>
-      <span class="chip mono">VO&#8322;max <b>48.1</b></span>
-      <span class="chip mono">Resting HR <b>54</b> bpm</span>
-    </div>
-  </section>
-
-  <!-- CALENDAR -->
-  <section>
-    <div class="section-head">
-      <span class="idx mono">09</span><span class="name">Your Next 3 Days</span>
-      <span class="tag" id="cal-tag">Calendar</span>
-    </div>
-    <div id="calendar">
-      <!-- Baked fallback (replaced live when calendar connects) -->
-      <div class="cal-day">
-        <h4>Wednesday, June 10</h4>
-        <div class="cal-item"><span class="time">12:00 PM</span><span class="ttl">Ramen with David</span></div>
-        <div class="cal-item"><span class="time">12:15 PM</span><span class="ttl">Peds Noon Report <span class="loc">&middot; Peds Classroom</span></span></div>
-        <div class="cal-item"><span class="time">6:00 PM</span><span class="ttl">Dinner with Residents</span></div>
-      </div>
-      <div class="cal-day">
-        <h4>Thursday, June 11</h4>
-        <div class="cal-item"><span class="time">9:00 AM</span><span class="ttl">Geico renewal</span></div>
-        <div class="cal-item"><span class="time">9:00 AM</span><span class="ttl">SBCERS</span></div>
-      </div>
-      <div class="cal-day">
-        <h4>Friday, June 12</h4>
-        <div class="cal-item"><span class="time">12:00 PM</span><span class="ttl">Meeting with Ali and Kendra</span></div>
-      </div>
-    </div>
-    <div class="cal-status mono" id="cal-status">Showing last saved schedule. Connecting to Google Calendar&hellip;</div>
-  </section>
-
-  <!-- SUBSTACK DIGEST -->
-  <section>
-    <div class="section-head">
-      <span class="idx mono">10</span><span class="name">Substack Digest</span>
-      <span class="tag">New Since Last Edition</span>
-    </div>
-    <div class="dig-note mono">
-      Rotating scan of ~50 tracked newsletters &mdash; only posts published since the prior edition (on or after Jun 9, 00:00 PT) appear here, grouped by theme. Six cleared the window across four themes; the endurance and space feeds had nothing new.
-    </div>
-
-    <!-- AI & ML -->
-    <div class="theme">
-      <div class="t-head"><span class="t-name">AI &amp; ML</span><span class="t-rule"></span><span class="t-count mono">2 new</span></div>
-      <div class="dig-item fresh">
-        <h4>What it feels like to work with Mythos</h4>
-        <div class="by mono">Ethan Mollick &middot; One Useful Thing &middot; <span class="new">NEW ~16h</span></div>
-        <p>Mollick logs his hands-on impressions of Anthropic's new Claude "Fable/Mythos" generation, calling it another big jump in capability. (Summary drawn from the post's lede; full text not yet read.)</p>
-      </div>
-      <div class="dig-item fresh">
-        <h4>Three Labs With a Plan and a Memorandum</h4>
-        <div class="by mono">Zvi Mowshowitz &middot; Don't Worry About the Vase &middot; <span class="new">NEW ~14h</span></div>
-        <p>The week's big story is the release of Claude Fable 5 — the version Anthropic believes it can safely distribute broadly — set against the competing safety plans and policy memos coming out of the major frontier labs. (Per the post's opening.)</p>
-      </div>
-    </div>
-
-    <!-- MEDICINE & HEALTH -->
-    <div class="theme">
-      <div class="t-head"><span class="t-name">Medicine &amp; Health</span><span class="t-rule"></span><span class="t-count mono">2 new</span></div>
-      <div class="dig-item fresh">
-        <h4>I'm healthy. I'm a little overweight. Should I start a GLP-1?</h4>
-        <div class="by mono">Sensible Medicine &middot; <span class="new">NEW ~3h</span></div>
-        <p>A "first, second, and third opinion" format weighing whether mildly overweight but otherwise healthy adults should begin a GLP-1 — timely given this week's oral-semaglutide approval. (Summary from headline and subtitle.)</p>
-      </div>
-      <div class="dig-item fresh">
-        <h4>Behind Every Dad Bod is a Dad Brain?</h4>
-        <div class="by mono">Sensible Medicine &middot; <span class="new">NEW ~25h</span></div>
-        <p>The causality puzzle in parenthood-and-cognition research: does having kids actually improve your brain, or are people with "better brains" simply more likely to have kids? (Summary from headline and subtitle.)</p>
-      </div>
-    </div>
-
-    <!-- ECONOMICS & PROGRESS -->
-    <div class="theme">
-      <div class="t-head"><span class="t-name">Economics &amp; Progress</span><span class="t-rule"></span><span class="t-count mono">1 new</span></div>
-      <div class="dig-item fresh">
-        <h4>Top Links 1128: a tri-polar investment super-cycle?</h4>
-        <div class="by mono">Adam Tooze &middot; Chartbook &middot; <span class="new">NEW ~2h</span></div>
-        <p>Tooze's curated links roundup, this edition flagging a possible tri-polar investment super-cycle, falling fertility in Delhi, and Indian satellites seeing through the monsoon. (Link digest, not a single essay.)</p>
-      </div>
-    </div>
-
-    <!-- CULTURE & SCI-FI -->
-    <div class="theme">
-      <div class="t-head"><span class="t-name">Culture &amp; Sci-Fi</span><span class="t-rule"></span><span class="t-count mono">1 new</span></div>
-      <div class="dig-item fresh">
-        <h4>Stop eating Lady Gaga's Oreos</h4>
-        <div class="by mono">Adam Mastroianni &middot; Experimental History &middot; <span class="new">NEW ~16h</span></div>
-        <p>Subtitled "The Great Switcheroo." (Headline only; full text not yet read.)</p>
-      </div>
-    </div>
-
-    <!-- COVERAGE -->
-    <div class="theme">
-      <div class="t-head"><span class="t-name">Also Scanned &middot; Nothing New</span><span class="t-rule"></span><span class="t-count mono">representative sweep</span></div>
-      <div class="cov">
-        <span class="chip mono">Endurance &amp; Performance <b>7</b></span>
-        <span class="chip mono">Space &amp; Cosmos <b>5</b></span>
+    <div class="rail"><span class="ridx">08</span><span class="rname">Substack Digest</span><span class="rtag">Since Last Edition</span></div>
+    <div class="sb">
+      <div class="dnote">Rotating scan of ~50 tracked newsletters &mdash; only posts published since the prior edition appear here. Today's sweep couldn't confirm new in-window posts (direct RSS retrieval unavailable this run); the theme coverage map is shown instead.</div>
+      <div class="chips">
+        <span class="chip">AI &amp; ML <b>8</b></span>
+        <span class="chip">Medicine &amp; Health <b>8</b></span>
+        <span class="chip">Endurance &amp; Performance <b>7</b></span>
+        <span class="chip">Space &amp; Cosmos <b>5</b></span>
+        <span class="chip">Geopolitics &amp; Governance <b>10</b></span>
+        <span class="chip">Economics &amp; Progress <b>5</b></span>
+        <span class="chip">Culture &amp; Sci-Fi <b>8</b></span>
       </div>
     </div>
   </section>
 
-  <footer class="mono">
-    <span>Auto-compiled 05:00 PT</span>
-    <span class="grow">Rundown</span>
-  </footer>
-
+  <footer><span>Auto-compiled 05:00 PT</span><span class="grow">The Daily Brian</span></footer>
 </div>
 
 <script>
-(function () {
-  var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  var DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-
-  // Keep the edition date label current
-  try {
-    var now = new Date();
-    document.getElementById("edition-date").textContent =
-      DAYS[now.getDay()] + ", " + MONTHS[now.getMonth()] + " " + now.getDate() + ", " + now.getFullYear();
-  } catch (e) {}
-
-  function fmtTime(d) {
-    var h = d.getHours(), m = d.getMinutes();
-    var ap = h >= 12 ? "PM" : "AM";
-    h = h % 12; if (h === 0) h = 12;
-    return h + ":" + (m < 10 ? "0" + m : m) + " " + ap;
-  }
-  function dayLabel(d) {
-    return DAYS[d.getDay()] + ", " + MONTHS[d.getMonth()] + " " + d.getDate();
-  }
-  function esc(s){ return (s||"").replace(/[&<>]/g, function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}); }
-
-  function pad(n){ return n < 10 ? "0" + n : "" + n; }
-  function isoLocal(d){
-    return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":00";
-  }
-
-  async function loadCalendar() {
-    if (!window.cowork || !window.cowork.callMcpTool) return; // not in Cowork; keep baked fallback
-    try {
-      var start = new Date(); start.setHours(0,0,0,0);
-      var end = new Date(start.getTime()); end.setDate(end.getDate() + 3);
-      var res = await window.cowork.callMcpTool(
-        "mcp__d84394cf-59e4-4adc-9ecf-f868bd8d6550__list_events",
-        { startTime: isoLocal(start), endTime: isoLocal(end), timeZone: "America/Los_Angeles", pageSize: 50, orderBy: "startTime" }
-      );
-      var data = typeof res === "string" ? JSON.parse(res) : res;
-      var events = (data && data.events) || [];
-      if (!events.length) { document.getElementById("cal-status").textContent = "No events in the next 3 days."; return; }
-
-      // Dedupe by summary+start, group by day
-      var seen = {}, groups = {};
-      events.forEach(function (ev) {
-        if (ev.status === "cancelled") return;
-        var allDay = !!(ev.start && ev.start.date && !ev.start.dateTime);
-        var startStr = (ev.start && (ev.start.dateTime || ev.start.date)) || "";
-        var key = (ev.summary || "") + "|" + startStr;
-        if (seen[key]) return; seen[key] = 1;
-        var d = new Date(startStr);
-        var gk = d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();
-        (groups[gk] = groups[gk] || { date: d, items: [] }).items.push({
-          allDay: allDay, time: allDay ? "All day" : fmtTime(d), sortT: d.getTime(),
-          title: ev.summary || "(no title)",
-          loc: (ev.location || "").split(";")[0].split(",")[0].trim()
-        });
+(function(){
+  var MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  try{var now=new Date();document.getElementById("edition-date").textContent=DAYS[now.getDay()]+", "+MONTHS[now.getMonth()]+" "+now.getDate()+", "+now.getFullYear();}catch(e){}
+  function fmtTime(d){var h=d.getHours(),m=d.getMinutes(),ap=h>=12?"PM":"AM";h=h%12;if(h===0)h=12;return h+":"+(m<10?"0"+m:m)+" "+ap;}
+  function dayLabel(d){return DAYS[d.getDay()]+", "+MONTHS[d.getMonth()]+" "+d.getDate();}
+  function esc(s){return(s||"").replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+  function pad(n){return n<10?"0"+n:""+n;}
+  function isoLocal(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":00";}
+  async function loadCalendar(){
+    if(!window.cowork||!window.cowork.callMcpTool)return;
+    try{
+      var start=new Date();start.setHours(0,0,0,0);
+      var end=new Date(start.getTime());end.setDate(end.getDate()+3);
+      var res=await window.cowork.callMcpTool("mcp__d84394cf-59e4-4adc-9ecf-f868bd8d6550__list_events",{startTime:isoLocal(start),endTime:isoLocal(end),timeZone:"America/Los_Angeles",pageSize:50,orderBy:"startTime"});
+      var data=typeof res==="string"?JSON.parse(res):res;
+      var events=(data&&data.events)||[];
+      if(!events.length){document.getElementById("cal-status").textContent="No events in the next 3 days.";return;}
+      var seen={},groups={};
+      events.forEach(function(ev){
+        if(ev.status==="cancelled")return;
+        var allDay=!!(ev.start&&ev.start.date&&!ev.start.dateTime);
+        var startStr=(ev.start&&(ev.start.dateTime||ev.start.date))||"";
+        var key=(ev.summary||"")+"|"+startStr;if(seen[key])return;seen[key]=1;
+        var d=new Date(startStr);var gk=d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();
+        (groups[gk]=groups[gk]||{date:d,items:[]}).items.push({allDay:allDay,time:allDay?"All day":fmtTime(d),sortT:d.getTime(),title:ev.summary||"(no title)",loc:(ev.location||"").split(";")[0].split(",")[0].trim()});
       });
-
-      var keys = Object.keys(groups).sort(function(a,b){ return groups[a].date - groups[b].date; });
-      var html = "";
-      keys.forEach(function (k) {
-        var g = groups[k];
-        g.items.sort(function(a,b){ return (a.allDay?-1:0)-(b.allDay?-1:0) || a.sortT - b.sortT; });
-        html += '<div class="cal-day"><h4>' + esc(dayLabel(g.date)) + '</h4>';
-        g.items.forEach(function (it) {
-          html += '<div class="cal-item"><span class="time">' + esc(it.time) + '</span><span class="ttl">' +
-                  esc(it.title) + (it.loc ? ' <span class="loc">&middot; ' + esc(it.loc) + '</span>' : '') + '</span></div>';
-        });
-        html += '</div>';
-      });
-      document.getElementById("calendar").innerHTML = html;
-      document.getElementById("cal-status").textContent = "Live from Google Calendar.";
-      document.getElementById("cal-tag").textContent = "LIVE";
-    } catch (e) {
-      document.getElementById("cal-status").textContent = "Showing last saved schedule (couldn't refresh calendar).";
-    }
+      var keys=Object.keys(groups).sort(function(a,b){return groups[a].date-groups[b].date;});
+      var html="";
+      keys.forEach(function(k){var g=groups[k];g.items.sort(function(a,b){return(a.allDay?-1:0)-(b.allDay?-1:0)||a.sortT-b.sortT;});
+        html+='<div class="cday"><h4>'+esc(dayLabel(g.date))+'</h4>';
+        g.items.forEach(function(it){html+='<div class="ci"><span class="t">'+esc(it.time)+'</span><span class="x">'+esc(it.title)+(it.loc?' <span class="loc">&middot; '+esc(it.loc)+'</span>':'')+'</span></div>';});
+        html+='</div>';});
+      document.getElementById("calendar").innerHTML=html;
+      document.getElementById("cal-status").textContent="Live from Google Calendar.";
+      document.getElementById("cal-tag").textContent="LIVE";
+    }catch(e){document.getElementById("cal-status").textContent="Showing last saved schedule (couldn't refresh calendar).";}
   }
   loadCalendar();
+  try{
+    var sendH=function(){try{var w=document.querySelector(".wrap");var h=w?Math.ceil(w.getBoundingClientRect().bottom+(parseFloat(getComputedStyle(w).marginBottom)||0)):document.documentElement.scrollHeight;parent.postMessage({dbId:"D",dbHeight:h},"*");}catch(e){}};
+    window.addEventListener("load",function(){setTimeout(sendH,300);setTimeout(sendH,1200);});
+  }catch(e){}
 })();
 </script>
 </body>
