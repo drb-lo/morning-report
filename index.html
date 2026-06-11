@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <script type="application/json" id="cowork-artifact-meta">
 {
-  "name": "Morning Report",
+  "name": "Rundown",
   "schemaVersion": 1,
-  "description": "Brian's daily Morning Report — curated world/US/Santa Barbara news, AI and clinical-medicine updates, upcoming local events, and a live Google Calendar view of the next 3 days. Regenerated each morning at 5 AM Pacific by a scheduled task.",
+  "description": "Brian's daily Morning Report (\"Rundown\"), Stack design — world/US/Santa Barbara news, AI and clinical-medicine updates, a Space & Astronomy section, a cross-spectrum Blindside read, a Vitals panel, upcoming local events, and a live Google Calendar view of the next 3 days. Regenerated each morning at 5 AM Pacific by a scheduled task.",
   "mcpTools": ["mcp__d84394cf-59e4-4adc-9ecf-f868bd8d6550__list_events"],
   "mcpServerNames": ["Google Calendar"]
 }
@@ -12,7 +12,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Daily Brian — Stack</title>
+<title>Rundown</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -113,7 +113,7 @@
 <div class="wrap">
 
   <header class="mast">
-    <h1><span class="l1">The</span><span class="l2">Daily</span><span class="l3">Brian</span></h1>
+    <h1><span class="l2">Run</span><span class="l3">Down</span></h1>
     <div class="mdate"><span id="edition-date">Wednesday, June 10, 2026</span></div>
   </header>
 
@@ -158,7 +158,21 @@
   </section>
 
   <section>
-    <div class="rail"><span class="ridx">06</span><span class="rname">Upcoming &middot; SB</span><span class="rtag">You &amp; Family</span></div>
+    <div class="rail"><span class="ridx">06</span><span class="rname">Space &amp; Astronomy</span><span class="rtag">Cosmos</span></div>
+    <div class="sb">
+      <div class="story"><h3>Populates at the next 5 AM edition</h3><p>This standing section fills automatically on the next scheduled run with 2&ndash;3 current astronomy, NASA and space-exploration items.</p><span class="src">Awaiting next run</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="rail"><span class="ridx">07</span><span class="rname">Blindside</span><span class="rtag">Steelman</span></div>
+    <div class="sb">
+      <div class="story"><h3>Populates at the next 5 AM edition</h3><p>One steelmanned article from outside the progressive media world, rotating lanes day to day, with a neutral summary and the fault line it exposes &mdash; fills automatically on the next scheduled run.</p><span class="src">Awaiting next run</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="rail"><span class="ridx">08</span><span class="rname">Upcoming &middot; SB</span><span class="rtag">You &amp; Family</span></div>
     <div class="sb">
       <div class="ev"><div class="d"><div class="n">06</div><div class="m">Jun</div></div><div><h4>World Oceans Day &mdash; free at the Sea Center</h4><p>Free admission to the Sea Center on Stearns Wharf; hands-on tide pools and touch tanks for kids.</p></div></div>
       <div class="ev"><div class="d"><div class="n">13</div><div class="m">Jun</div></div><div><h4>SYV Pride Parade &amp; Festival &mdash; Solvang</h4><p>11am&ndash;4pm parade through downtown Solvang plus live music, food, bounce houses and face painting &mdash; all ages.</p></div></div>
@@ -170,7 +184,14 @@
   </section>
 
   <section>
-    <div class="rail"><span class="ridx">07</span><span class="rname">Your Next 3 Days</span><span class="rtag" id="cal-tag">Calendar</span></div>
+    <div class="rail"><span class="ridx">09</span><span class="rname">Vitals</span><span class="rtag">Garmin</span></div>
+    <div class="sb">
+      <div class="story"><h3>Awaiting next sync</h3><p>HRV, cycling load, recovery readiness, VO&#8322;max and resting HR populate from the morning Garmin sync on the next scheduled run.</p><span class="src">Garmin &middot; health.json</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="rail"><span class="ridx">10</span><span class="rname">Your Next 3 Days</span><span class="rtag" id="cal-tag">Calendar</span></div>
     <div class="sb">
       <div id="calendar">
         <div class="cday"><h4>Friday, June 5</h4>
@@ -192,7 +213,7 @@
   </section>
 
   <section>
-    <div class="rail"><span class="ridx">08</span><span class="rname">Substack Digest</span><span class="rtag">Since Last Edition</span></div>
+    <div class="rail"><span class="ridx">11</span><span class="rname">Substack Digest</span><span class="rtag">Since Last Edition</span></div>
     <div class="sb">
       <div class="dnote">Rotating scan of ~50 tracked newsletters &mdash; only posts published since the prior edition appear here. Today's sweep couldn't confirm new in-window posts (direct RSS retrieval unavailable this run); the theme coverage map is shown instead.</div>
       <div class="chips">
@@ -207,7 +228,7 @@
     </div>
   </section>
 
-  <footer><span>Auto-compiled 05:00 PT</span><span class="grow">The Daily Brian</span></footer>
+  <footer><span>Auto-compiled 05:00 PT</span><span class="grow">Rundown</span></footer>
 </div>
 
 <script>
