@@ -38,6 +38,10 @@
   .pillrow{display:flex;gap:8px;flex-wrap:wrap}
   .pill{padding:10px 14px;background:#252a35;border-radius:999px;font-weight:600;font-size:15px}
   .pill.on{background:var(--acc)}
+  .today{background:#13233a;border:1px solid var(--acc);border-radius:14px;padding:12px 14px;margin-bottom:14px}
+  .today .lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);font-weight:700}
+  .today .ttl{font-size:17px;font-weight:800;margin:3px 0 4px}
+  .today .body{font-size:13px;color:var(--dim);line-height:1.4}
   a{color:var(--acc)}
 </style>
 </head>
@@ -65,7 +69,7 @@ const TPL={
  W:['Band Pull-Apart','Face Pull','Y-T-W','Goblet Squat','DB Row','KB Press','KB Swing','Carry']
 };
 /* ============ STATE ============ */
-let key=localStorage.gymKey||'', hist={}, sess=null, restEnd=0, restTick=null;
+let key=localStorage.gymKey||'', hist={}, sess=null, restEnd=0, restTick=null, todayPlan=null;
 try{sess=JSON.parse(localStorage.gymDraft||'null')}catch(e){sess=null}
 const $=id=>document.getElementById(id);
 const app=()=>$('app');
@@ -115,6 +119,21 @@ const fmtSets=sets=>{ // group into "WxR,R,R" segments
   if(cw!==null)segs.push(cw+'x'+rs.join(','));
   return segs.join(' ');
 };
+/* ============ TODAY'S PLAN (from intervals.icu calendar NOTE) ============ */
+async function loadToday(){
+  todayPlan=null;
+  const t=new Date().toISOString().slice(0,10);
+  try{
+    const list=await api(`/athlete/${ATHLETE}/events?oldest=${t}&newest=${t}`);
+    const note=(list||[]).find(e=>/strength\s+([LUW])\b/i.test(e.name||''));
+    if(note){const m=note.name.match(/strength\s+([LUW])/i);
+      todayPlan={tpl:m[1].toUpperCase(),title:note.name,body:note.description||''};}
+  }catch(e){/* offline / no key — banner just hidden */}
+}
+const todayBanner=()=>!todayPlan?'':`<div class="today">
+  <div class="lbl">Today's session — coach</div>
+  <div class="ttl">${todayPlan.title}</div>
+  ${todayPlan.body?`<div class="body">${todayPlan.body}</div>`:''}</div>`;
 /* ============ VIEWS ============ */
 function render(){ key? (sess?vSession():vHome()) : vSetup(); }
 function vSetup(){
@@ -125,17 +144,23 @@ function vSetup(){
 }
 function saveKey(){key=$('k').value.trim();if(!key)return;localStorage.gymKey=key;boot();}
 async function vHome(){
-  app().innerHTML=`<h1>Gym Logger</h1><div class="muted">Loading history…</div>`;
-  try{await loadHistory()}catch(e){app().innerHTML=`<h1>Gym Logger</h1><div class="card">History fetch failed (${e.message}). <a href="#" onclick="localStorage.removeItem('gymKey');location.reload()">Re-enter key</a> or start anyway below.</div>`+homeButtons();return}
-  app().innerHTML=`<h1>Gym Logger</h1>${homeButtons()}<h2>PRs (e1RM)</h2><div class="card">${
+  app().innerHTML=`<h1>Gym Logger</h1><div class="muted">Loading…</div>`;
+  await loadToday();
+  try{await loadHistory()}catch(e){app().innerHTML=`<h1>Gym Logger</h1>${todayBanner()}<div class="card">History fetch failed (${e.message}). <a href="#" onclick="localStorage.removeItem('gymKey');location.reload()">Re-enter key</a> or start anyway below.</div>`+homeButtons();return}
+  app().innerHTML=`<h1>Gym Logger</h1>${todayBanner()}${homeButtons()}<h2>PRs (e1RM)</h2><div class="card">${
     Object.keys(hist).length? Object.keys(LIB).filter(e=>hist[e]&&prOf(e)>0).map(e=>
       `<div class="row" style="padding:6px 0" onclick="vChart('${e}')"><div class="grow exname" style="font-size:15px">${e}</div><div class="chip">${Math.round(prOf(e))} lb</div></div>`).join('')||'<span class="muted">No weighted lifts yet.</span>'
     :'<span class="muted">No sessions logged yet — go lift.</span>'}</div>`;
 }
-const homeButtons=()=>`
-  <button class="big" onclick="start('L')">Start L — Legs / FTP</button>
-  <button class="big sec" onclick="start('U')">Start U — Upper</button>
-  <button class="big sec" onclick="start('W')">Start W — Whole body</button>`;
+const homeButtons=()=>{
+  const rec=todayPlan?todayPlan.tpl:null;
+  const cls=t=>rec?(rec===t?'big':'big sec'):(t==='L'?'big':'big sec');
+  const tag=t=>rec===t?' · today':'';
+  return `
+  <button class="${cls('L')}" onclick="start('L')">Start L — Legs / FTP${tag('L')}</button>
+  <button class="${cls('U')}" onclick="start('U')">Start U — Upper${tag('U')}</button>
+  <button class="${cls('W')}" onclick="start('W')">Start W — Whole body${tag('W')}</button>`;
+};
 function start(t){
   sess={t,start:Date.now(),ex:TPL[t].map(n=>{
     const last=lastSets(n),def=LIB[n];
